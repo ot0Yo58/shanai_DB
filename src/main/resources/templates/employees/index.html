@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社員一覧</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+    <div>
+        <h1>社員カルテDB</h1>
+        <p>Employee Profile Database</p>
+    </div>
+</header>
+
+<main class="container">
+
+    <div class="page-head">
+        <div>
+            <h2>社員一覧</h2>
+            <p class="sub-text">社員情報、Cytech進捗、面談履歴、問い合わせ履歴を管理します。</p>
+        </div>
+        <a class="btn primary" th:href="@{/employees/new}">＋ 社員登録</a>
+    </div>
+
+    <section class="card">
+        <form class="search-form" th:action="@{/employees}" method="get">
+            <input type="text" name="q" th:value="${q}" placeholder="名前で検索">
+            <button class="btn" type="submit">検索</button>
+            <a class="btn ghost" th:href="@{/employees}">クリア</a>
+        </form>
+    </section>
+
+    <section class="card">
+        <p class="section-help pc-help">対象の行をダブルクリックすると、社員詳細画面を開きます。</p>
+        <p class="section-help sp-help">対象のカードをタップすると、社員詳細画面を開きます。</p>
+
+        <div class="table-scroll">
+            <table class="data-table employee-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>社員番号</th>
+                    <th>名前</th>
+                    <th>カナ</th>
+                    <th>入社日</th>
+                    <th>通勤方法</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="employee : ${employees}"
+                    class="clickable-row"
+                    th:data-href="@{/employees/{id}(id=${employee.id})}"
+                    ondblclick="location.href=this.dataset.href"
+                    onclick="openDetailOnMobile(this)">
+
+                    <td data-label="ID" th:text="${employee.id}">1</td>
+                    <td data-label="社員番号" th:text="${employee.employeeCode}">E001</td>
+                    <td data-label="名前" th:text="${employee.name}">山田 太郎</td>
+                    <td data-label="カナ" th:text="${employee.nameKana}">ヤマダ タロウ</td>
+                    <td data-label="入社日" th:text="${employee.joinDate}">2026-04-01</td>
+                    <td data-label="通勤方法" th:text="${employee.commuteMethod}">電車</td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(employees)}" class="empty-row">
+                    <td colspan="6" class="empty">社員データがありません。</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    function openDetailOnMobile(row) {
+        const isMobileWidth = window.innerWidth <= 800;
+        const isTouchDevice =
+            window.matchMedia("(pointer: coarse)").matches ||
+            navigator.maxTouchPoints > 0;
+
+        if (isMobileWidth || isTouchDevice) {
+            location.href = row.dataset.href;
+        }
+    }
+</script>
+
+</body>
+</html>

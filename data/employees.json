@@ -1,0 +1,16 @@
+[
+  {
+    "id": "f6088647-4681-47eb-b5de-85955946adcb",
+    "employeeCode": "h001",
+    "name": "三浦豊晴",
+    "nameKana": "ミウラトヨハル",
+    "birthday": "1993-03-27",
+    "address": "北海道",
+    "joinDate": "2025-06-01",
+    "commuteMethod": "車",
+    "futureVision": "AIエンジニア",
+    "memo": "test",
+    "createdAt": "2026-05-25T10:50:51.825Z",
+    "updatedAt": "2026-05-25T10:50:51.825Z"
+  }
+]

@@ -1,15 +1,10 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
-import {
-  deleteCompanyEventHistory,
-  deleteCytechProgress,
-  deleteEmployee,
-  deleteInterviewHistory,
-  deletePrivateEvent,
-  deleteTroubleHistory,
-  getEmployeeById,
-} from "@/lib/store";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+
+import { getEmployeeById } from "@/lib/store";
 import type {
   CompanyEventHistory,
   CompanyEventRole,
@@ -30,11 +25,28 @@ type PageProps = {
   }>;
 };
 
+type DetailSection = {
+  id:
+    | "basic"
+    | "cytech"
+    | "interviews"
+    | "troubles"
+    | "company-events"
+    | "private-events";
+  title: string;
+  description: string;
+  editHref: string;
+  body: ReactNode;
+};
+
 function displayValue(value: string | undefined): string {
   return value && value.trim() !== "" ? value : "-";
 }
 
-function labelFromMap<T extends string>(value: T, labels: Record<T, string>): string {
+function labelFromMap<T extends string>(
+  value: T,
+  labels: Record<T, string>,
+): string {
   return labels[value] ?? value;
 }
 
@@ -82,88 +94,9 @@ const privateEventCategoryLabels: Record<PrivateEventCategory, string> = {
   other: "その他",
 };
 
-async function deleteEmployeeAction(formData: FormData) {
-  "use server";
-
-  const id = String(formData.get("id") ?? "").trim();
-
-  if (id) {
-    await deleteEmployee(id);
-  }
-
-  redirect("/");
-}
-
-async function deleteCytechProgressAction(formData: FormData) {
-  "use server";
-
-  const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const progressId = String(formData.get("progressId") ?? "").trim();
-
-  if (employeeId && progressId) {
-    await deleteCytechProgress(employeeId, progressId);
-  }
-
-  redirect(`/employees/${employeeId}`);
-}
-
-async function deleteInterviewHistoryAction(formData: FormData) {
-  "use server";
-
-  const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const interviewId = String(formData.get("interviewId") ?? "").trim();
-
-  if (employeeId && interviewId) {
-    await deleteInterviewHistory(employeeId, interviewId);
-  }
-
-  redirect(`/employees/${employeeId}`);
-}
-
-async function deleteTroubleHistoryAction(formData: FormData) {
-  "use server";
-
-  const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const troubleId = String(formData.get("troubleId") ?? "").trim();
-
-  if (employeeId && troubleId) {
-    await deleteTroubleHistory(employeeId, troubleId);
-  }
-
-  redirect(`/employees/${employeeId}`);
-}
-
-async function deleteCompanyEventHistoryAction(formData: FormData) {
-  "use server";
-
-  const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const eventId = String(formData.get("eventId") ?? "").trim();
-
-  if (employeeId && eventId) {
-    await deleteCompanyEventHistory(employeeId, eventId);
-  }
-
-  redirect(`/employees/${employeeId}`);
-}
-
-async function deletePrivateEventAction(formData: FormData) {
-  "use server";
-
-  const employeeId = String(formData.get("employeeId") ?? "").trim();
-  const eventId = String(formData.get("eventId") ?? "").trim();
-
-  if (employeeId && eventId) {
-    await deletePrivateEvent(employeeId, eventId);
-  }
-
-  redirect(`/employees/${employeeId}`);
-}
-
 function CytechProgressList({
-  employeeId,
   progressList,
 }: {
-  employeeId: string;
   progressList: CytechProgress[];
 }) {
   if (progressList.length === 0) {
@@ -191,23 +124,6 @@ function CytechProgressList({
           </div>
 
           <p className="progress-memo">{displayValue(progress.memo)}</p>
-
-          <div className="progress-actions">
-            <Link
-              className="mini-btn ghost"
-              href={`/employees/${employeeId}/cytech/${progress.id}/edit`}
-            >
-              編集
-            </Link>
-
-            <form action={deleteCytechProgressAction}>
-              <input type="hidden" name="employeeId" value={employeeId} />
-              <input type="hidden" name="progressId" value={progress.id} />
-              <button className="mini-btn danger-mini" type="submit">
-                削除
-              </button>
-            </form>
-          </div>
         </article>
       ))}
     </div>
@@ -215,10 +131,8 @@ function CytechProgressList({
 }
 
 function InterviewHistoryList({
-  employeeId,
   interviewList,
 }: {
-  employeeId: string;
   interviewList: InterviewHistory[];
 }) {
   if (interviewList.length === 0) {
@@ -245,35 +159,21 @@ function InterviewHistoryList({
               <span>面談内容</span>
               <p>{displayValue(interview.summary)}</p>
             </div>
+
             <div>
               <span>次回アクション</span>
               <p>{displayValue(interview.nextAction)}</p>
             </div>
+
             <div>
               <span>次回対応日</span>
               <p>{displayValue(interview.nextActionDate)}</p>
             </div>
+
             <div>
               <span>メモ</span>
               <p>{displayValue(interview.memo)}</p>
             </div>
-          </div>
-
-          <div className="progress-actions">
-            <Link
-              className="mini-btn ghost"
-              href={`/employees/${employeeId}/interviews/${interview.id}/edit`}
-            >
-              編集
-            </Link>
-
-            <form action={deleteInterviewHistoryAction}>
-              <input type="hidden" name="employeeId" value={employeeId} />
-              <input type="hidden" name="interviewId" value={interview.id} />
-              <button className="mini-btn danger-mini" type="submit">
-                削除
-              </button>
-            </form>
           </div>
         </article>
       ))}
@@ -282,10 +182,8 @@ function InterviewHistoryList({
 }
 
 function TroubleHistoryList({
-  employeeId,
   troubleList,
 }: {
-  employeeId: string;
   troubleList: TroubleHistory[];
 }) {
   if (troubleList.length === 0) {
@@ -317,35 +215,21 @@ function TroubleHistoryList({
               <span>内容</span>
               <p>{displayValue(trouble.detail)}</p>
             </div>
+
             <div>
               <span>対応内容</span>
               <p>{displayValue(trouble.action)}</p>
             </div>
+
             <div>
               <span>解決日</span>
               <p>{displayValue(trouble.resolvedAt)}</p>
             </div>
+
             <div>
               <span>メモ</span>
               <p>{displayValue(trouble.memo)}</p>
             </div>
-          </div>
-
-          <div className="progress-actions">
-            <Link
-              className="mini-btn ghost"
-              href={`/employees/${employeeId}/troubles/${trouble.id}/edit`}
-            >
-              編集
-            </Link>
-
-            <form action={deleteTroubleHistoryAction}>
-              <input type="hidden" name="employeeId" value={employeeId} />
-              <input type="hidden" name="troubleId" value={trouble.id} />
-              <button className="mini-btn danger-mini" type="submit">
-                削除
-              </button>
-            </form>
           </div>
         </article>
       ))}
@@ -354,10 +238,8 @@ function TroubleHistoryList({
 }
 
 function CompanyEventHistoryList({
-  employeeId,
   eventList,
 }: {
-  employeeId: string;
   eventList: CompanyEventHistory[];
 }) {
   if (eventList.length === 0) {
@@ -388,27 +270,11 @@ function CompanyEventHistoryList({
               <span>所感</span>
               <p>{displayValue(event.impression)}</p>
             </div>
+
             <div>
               <span>メモ</span>
               <p>{displayValue(event.memo)}</p>
             </div>
-          </div>
-
-          <div className="progress-actions">
-            <Link
-              className="mini-btn ghost"
-              href={`/employees/${employeeId}/company-events/${event.id}/edit`}
-            >
-              編集
-            </Link>
-
-            <form action={deleteCompanyEventHistoryAction}>
-              <input type="hidden" name="employeeId" value={employeeId} />
-              <input type="hidden" name="eventId" value={event.id} />
-              <button className="mini-btn danger-mini" type="submit">
-                削除
-              </button>
-            </form>
           </div>
         </article>
       ))}
@@ -417,14 +283,16 @@ function CompanyEventHistoryList({
 }
 
 function PrivateEventList({
-  employeeId,
   eventList,
 }: {
-  employeeId: string;
   eventList: PrivateEvent[];
 }) {
   if (eventList.length === 0) {
-    return <p className="empty-note">プライベートイベントはまだ登録されていません。</p>;
+    return (
+      <p className="empty-note">
+        プライベートイベントはまだ登録されていません。
+      </p>
+    );
   }
 
   return (
@@ -447,27 +315,11 @@ function PrivateEventList({
               <span>内容</span>
               <p>{displayValue(event.detail)}</p>
             </div>
+
             <div>
               <span>メモ</span>
               <p>{displayValue(event.memo)}</p>
             </div>
-          </div>
-
-          <div className="progress-actions">
-            <Link
-              className="mini-btn ghost"
-              href={`/employees/${employeeId}/private-events/${event.id}/edit`}
-            >
-              編集
-            </Link>
-
-            <form action={deletePrivateEventAction}>
-              <input type="hidden" name="employeeId" value={employeeId} />
-              <input type="hidden" name="eventId" value={event.id} />
-              <button className="mini-btn danger-mini" type="submit">
-                削除
-              </button>
-            </form>
           </div>
         </article>
       ))}
@@ -483,50 +335,59 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const sections = [
+  const sections: DetailSection[] = [
     {
+      id: "basic",
       title: "基本情報",
       description: "社員の基本プロフィールを確認できます。",
-      addHref: null,
-      editHref: `/employees/${employee.id}/edit`,
+      editHref: `/employees/${employee.id}/edit?section=basic`,
       body: (
         <div className="profile-grid">
           <div className="profile-item">
             <span>ID</span>
             <strong>{displayValue(employee.id)}</strong>
           </div>
+
           <div className="profile-item">
             <span>社員番号</span>
             <strong>{displayValue(employee.employeeCode)}</strong>
           </div>
+
           <div className="profile-item">
             <span>氏名</span>
             <strong>{displayValue(employee.name)}</strong>
           </div>
+
           <div className="profile-item">
             <span>カナ</span>
             <strong>{displayValue(employee.nameKana)}</strong>
           </div>
+
           <div className="profile-item">
             <span>生年月日</span>
             <strong>{displayValue(employee.birthday)}</strong>
           </div>
+
           <div className="profile-item">
             <span>入社日</span>
             <strong>{displayValue(employee.joinDate)}</strong>
           </div>
+
           <div className="profile-item">
             <span>通勤方法</span>
             <strong>{displayValue(employee.commuteMethod)}</strong>
           </div>
+
           <div className="profile-item full">
             <span>住所</span>
             <strong>{displayValue(employee.address)}</strong>
           </div>
+
           <div className="profile-item full">
             <span>将来像</span>
             <strong>{displayValue(employee.futureVision)}</strong>
           </div>
+
           <div className="profile-item full">
             <span>メモ</span>
             <strong>{displayValue(employee.memo)}</strong>
@@ -535,64 +396,49 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
       ),
     },
     {
+      id: "cytech",
       title: "Cytech進捗",
-      description: "Cytechの学習状況・詰まっている箇所・完了日を管理します。",
-      addHref: `/employees/${employee.id}/cytech/new`,
-      editHref: null,
-      body: (
-        <CytechProgressList
-          employeeId={employee.id}
-          progressList={employee.cytechProgress ?? []}
-        />
-      ),
+      description: "Cytechの学習状況・詰まっている箇所・完了日を確認できます。",
+      editHref: `/employees/${employee.id}/edit?section=cytech`,
+      body: <CytechProgressList progressList={employee.cytechProgress ?? []} />,
     },
     {
+      id: "interviews",
       title: "面談履歴",
-      description: "面談日、内容、次回アクションなどを管理します。",
-      addHref: `/employees/${employee.id}/interviews/new`,
-      editHref: null,
+      description: "面談日、内容、次回アクションなどを確認できます。",
+      editHref: `/employees/${employee.id}/edit?section=interviews`,
       body: (
         <InterviewHistoryList
-          employeeId={employee.id}
           interviewList={employee.interviewHistory ?? []}
         />
       ),
     },
     {
+      id: "troubles",
       title: "問い合わせ・トラブル履歴",
-      description: "問い合わせ内容、対応状況、解決メモを管理します。",
-      addHref: `/employees/${employee.id}/troubles/new`,
-      editHref: null,
+      description: "問い合わせ内容、対応状況、解決メモを確認できます。",
+      editHref: `/employees/${employee.id}/edit?section=troubles`,
       body: (
-        <TroubleHistoryList
-          employeeId={employee.id}
-          troubleList={employee.troubleHistory ?? []}
-        />
+        <TroubleHistoryList troubleList={employee.troubleHistory ?? []} />
       ),
     },
     {
+      id: "company-events",
       title: "社内イベント参加履歴",
-      description: "社内イベントへの参加状況を管理します。",
-      addHref: `/employees/${employee.id}/company-events/new`,
-      editHref: null,
+      description: "社内イベントへの参加状況を確認できます。",
+      editHref: `/employees/${employee.id}/edit?section=company-events`,
       body: (
         <CompanyEventHistoryList
-          employeeId={employee.id}
           eventList={employee.companyEventHistory ?? []}
         />
       ),
     },
     {
+      id: "private-events",
       title: "プライベートイベント",
-      description: "本人に関する任意の補足イベントを管理します。",
-      addHref: `/employees/${employee.id}/private-events/new`,
-      editHref: null,
-      body: (
-        <PrivateEventList
-          employeeId={employee.id}
-          eventList={employee.privateEvents ?? []}
-        />
-      ),
+      description: "本人に関する任意の補足イベントを確認できます。",
+      editHref: `/employees/${employee.id}/edit?section=private-events`,
+      body: <PrivateEventList eventList={employee.privateEvents ?? []} />,
     },
   ];
 
@@ -610,10 +456,19 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
       </header>
 
       <main className="container">
-        <section className="detail-hero">
+        <Breadcrumbs
+  items={[
+    { label: "社員一覧", href: "/" },
+    { label: employee.name },
+  ]}
+/>
+        <section className="detail-hero employee-page-hero">
           <div>
             <p className="eyebrow">Employee Detail</p>
-            <h2>{employee.name}</h2>
+            <div className="page-title-row">
+              <h2>{employee.name}</h2>
+              <span className="page-mode-badge">詳細画面</span>
+            </div>
             <p className="sub-text">
               {displayValue(employee.employeeCode)} /{" "}
               {displayValue(employee.nameKana)}
@@ -625,32 +480,31 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
               一覧へ戻る
             </Link>
 
-            <Link className="btn primary" href={`/employees/${employee.id}/edit`}>
+            <Link
+              className="btn primary"
+              href={`/employees/${employee.id}/edit?section=basic`}
+            >
               編集画面へ
             </Link>
           </div>
         </section>
 
         <section className="accordion-list">
-          {sections.map((section) => (
-            <details className="accordion-card" key={section.title}>
+          {sections.map((section, index) => (
+            <details
+              className="accordion-card"
+              key={section.id}
+              open={index === 0}
+            >
               <summary className="accordion-summary">
                 <span className="accordion-title">{section.title}</span>
 
                 <span className="accordion-actions">
                   <span className="accordion-toggle-icon">＋</span>
 
-                  {section.addHref ? (
-                    <Link className="mini-btn" href={section.addHref}>
-                      追加
-                    </Link>
-                  ) : null}
-
-                  {section.editHref ? (
-                    <Link className="mini-btn ghost" href={section.editHref}>
-                      編集
-                    </Link>
-                  ) : null}
+                  <Link className="mini-btn ghost" href={section.editHref}>
+                    編集
+                  </Link>
                 </span>
               </summary>
 
@@ -660,22 +514,6 @@ export default async function EmployeeDetailPage({ params }: PageProps) {
               </div>
             </details>
           ))}
-        </section>
-
-        <section className="card danger-zone">
-          <div>
-            <h3>削除</h3>
-            <p className="section-help">
-              この社員データを削除します。削除すると一覧から表示されなくなります。
-            </p>
-          </div>
-
-          <form action={deleteEmployeeAction}>
-            <input type="hidden" name="id" value={employee.id} />
-            <button className="btn danger" type="submit">
-              この社員を削除する
-            </button>
-          </form>
         </section>
       </main>
     </>

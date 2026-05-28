@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+
 import { addCompanyEventHistory, getEmployeeById } from "@/lib/store";
 import type { CompanyEventRole } from "@/types/employee";
 
@@ -36,7 +38,7 @@ async function createCompanyEventAction(employeeId: string, formData: FormData) 
     memo: getFormValue(formData, "memo"),
   });
 
-  redirect(`/employees/${employeeId}`);
+  redirect(`/employees/${employeeId}/edit?section=company-events`);
 }
 
 export default async function NewCompanyEventPage({ params }: PageProps) {
@@ -63,18 +65,37 @@ export default async function NewCompanyEventPage({ params }: PageProps) {
       </header>
 
       <main className="container">
-        <section className="page-head">
+        <Breadcrumbs
+  items={[
+    { label: "社員一覧", href: "/" },
+    { label: employee.name, href: `/employees/${employee.id}` },
+    {
+      label: "編集",
+      href: `/employees/${employee.id}/edit?section=company-events`,
+    },
+    { label: "社内イベント参加履歴追加" },
+  ]}
+/>
+        <section className="detail-hero employee-page-hero">
           <div>
             <p className="eyebrow">Add Company Event</p>
-            <h2>社内イベント参加履歴追加</h2>
+            <div className="page-title-row">
+              <h2>社内イベント参加履歴追加</h2>
+              <span className="page-mode-badge">追加画面</span>
+            </div>
             <p className="sub-text">
               {employee.name} さんのイベント履歴を追加します。
             </p>
           </div>
 
-          <Link className="btn ghost" href={`/employees/${employee.id}`}>
-            詳細へ戻る
-          </Link>
+          <div className="page-actions">
+            <Link
+              className="btn ghost"
+              href={`/employees/${employee.id}/edit?section=company-events`}
+            >
+              編集画面へ戻る
+            </Link>
+          </div>
         </section>
 
         <section className="card">
@@ -112,7 +133,10 @@ export default async function NewCompanyEventPage({ params }: PageProps) {
             </div>
 
             <div className="form-actions">
-              <Link className="btn ghost" href={`/employees/${employee.id}`}>
+              <Link
+                className="btn ghost"
+                href={`/employees/${employee.id}/edit?section=company-events`}
+              >
                 キャンセル
               </Link>
 

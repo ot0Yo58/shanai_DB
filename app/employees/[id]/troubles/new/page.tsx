@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+
 import { addTroubleHistory, getEmployeeById } from "@/lib/store";
 import type { TroubleStatus, TroubleType } from "@/types/employee";
 
@@ -14,12 +16,23 @@ function getFormValue(formData: FormData, key: string): string {
 
 function getTypeValue(value: string): TroubleType {
   const allowed: TroubleType[] = ["inquiry", "trouble", "request", "other"];
-  return allowed.includes(value as TroubleType) ? (value as TroubleType) : "inquiry";
+
+  return allowed.includes(value as TroubleType)
+    ? (value as TroubleType)
+    : "inquiry";
 }
 
 function getStatusValue(value: string): TroubleStatus {
-  const allowed: TroubleStatus[] = ["open", "in_progress", "resolved", "watching"];
-  return allowed.includes(value as TroubleStatus) ? (value as TroubleStatus) : "open";
+  const allowed: TroubleStatus[] = [
+    "open",
+    "in_progress",
+    "resolved",
+    "watching",
+  ];
+
+  return allowed.includes(value as TroubleStatus)
+    ? (value as TroubleStatus)
+    : "open";
 }
 
 async function createTroubleAction(employeeId: string, formData: FormData) {
@@ -36,7 +49,7 @@ async function createTroubleAction(employeeId: string, formData: FormData) {
     memo: getFormValue(formData, "memo"),
   });
 
-  redirect(`/employees/${employeeId}`);
+  redirect(`/employees/${employeeId}/edit?section=troubles`);
 }
 
 export default async function NewTroublePage({ params }: PageProps) {
@@ -57,21 +70,43 @@ export default async function NewTroublePage({ params }: PageProps) {
             <h1>社員カルテDB</h1>
             <p>Employee Profile Database</p>
           </Link>
+
           <div className="app-header__badge">Trouble History</div>
         </div>
       </header>
 
       <main className="container">
-        <section className="page-head">
+        <Breadcrumbs
+  items={[
+    { label: "社員一覧", href: "/" },
+    { label: employee.name, href: `/employees/${employee.id}` },
+    {
+      label: "編集",
+      href: `/employees/${employee.id}/edit?section=troubles`,
+    },
+    { label: "問い合わせ・トラブル履歴追加" },
+  ]}
+/>
+        <section className="detail-hero employee-page-hero">
           <div>
             <p className="eyebrow">Add Trouble History</p>
-            <h2>問い合わせ・トラブル履歴追加</h2>
-            <p className="sub-text">{employee.name} さんの履歴を追加します。</p>
+            <div className="page-title-row">
+              <h2>問い合わせ・トラブル履歴追加</h2>
+              <span className="page-mode-badge">追加画面</span>
+            </div>
+            <p className="sub-text">
+              {employee.name} さんの履歴を追加します。
+            </p>
           </div>
 
-          <Link className="btn ghost" href={`/employees/${employee.id}`}>
-            詳細へ戻る
-          </Link>
+          <div className="page-actions">
+            <Link
+              className="btn ghost"
+              href={`/employees/${employee.id}/edit?section=troubles`}
+            >
+              編集画面へ戻る
+            </Link>
+          </div>
         </section>
 
         <section className="card">
@@ -129,9 +164,13 @@ export default async function NewTroublePage({ params }: PageProps) {
             </div>
 
             <div className="form-actions">
-              <Link className="btn ghost" href={`/employees/${employee.id}`}>
+              <Link
+                className="btn ghost"
+                href={`/employees/${employee.id}/edit?section=troubles`}
+              >
                 キャンセル
               </Link>
+
               <button className="btn primary" type="submit">
                 追加する
               </button>

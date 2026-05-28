@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+
 import { addPrivateEvent, getEmployeeById } from "@/lib/store";
 import type { PrivateEventCategory } from "@/types/employee";
 
@@ -37,7 +39,7 @@ async function createPrivateEventAction(employeeId: string, formData: FormData) 
     memo: getFormValue(formData, "memo"),
   });
 
-  redirect(`/employees/${employeeId}`);
+  redirect(`/employees/${employeeId}/edit?section=private-events`);
 }
 
 export default async function NewPrivateEventPage({ params }: PageProps) {
@@ -58,21 +60,43 @@ export default async function NewPrivateEventPage({ params }: PageProps) {
             <h1>社員カルテDB</h1>
             <p>Employee Profile Database</p>
           </Link>
+
           <div className="app-header__badge">Private Event</div>
         </div>
       </header>
 
       <main className="container">
-        <section className="page-head">
+        <Breadcrumbs
+  items={[
+    { label: "社員一覧", href: "/" },
+    { label: employee.name, href: `/employees/${employee.id}` },
+    {
+      label: "編集",
+      href: `/employees/${employee.id}/edit?section=private-events`,
+    },
+    { label: "プライベートイベント追加" },
+  ]}
+/>
+        <section className="detail-hero employee-page-hero">
           <div>
             <p className="eyebrow">Add Private Event</p>
-            <h2>プライベートイベント追加</h2>
-            <p className="sub-text">{employee.name} さんのイベントを追加します。</p>
+            <div className="page-title-row">
+              <h2>プライベートイベント追加</h2>
+              <span className="page-mode-badge">追加画面</span>
+            </div>
+            <p className="sub-text">
+              {employee.name} さんのイベントを追加します。
+            </p>
           </div>
 
-          <Link className="btn ghost" href={`/employees/${employee.id}`}>
-            詳細へ戻る
-          </Link>
+          <div className="page-actions">
+            <Link
+              className="btn ghost"
+              href={`/employees/${employee.id}/edit?section=private-events`}
+            >
+              編集画面へ戻る
+            </Link>
+          </div>
         </section>
 
         <section className="card">
@@ -111,9 +135,13 @@ export default async function NewPrivateEventPage({ params }: PageProps) {
             </div>
 
             <div className="form-actions">
-              <Link className="btn ghost" href={`/employees/${employee.id}`}>
+              <Link
+                className="btn ghost"
+                href={`/employees/${employee.id}/edit?section=private-events`}
+              >
                 キャンセル
               </Link>
+
               <button className="btn primary" type="submit">
                 追加する
               </button>

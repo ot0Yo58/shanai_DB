@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+
 import {
   getEmployeeById,
   getTroubleHistoryById,
@@ -84,6 +86,17 @@ export default async function EditTroublePage({ params }: PageProps) {
       </header>
 
       <main className="container">
+        <Breadcrumbs
+  items={[
+    { label: "社員一覧", href: "/" },
+    { label: employee.name, href: `/employees/${employee.id}` },
+    {
+      label: "編集",
+      href: `/employees/${employee.id}/edit?section=troubles`,
+    },
+    { label: "問い合わせ・トラブル履歴追加" },
+  ]}
+/>
         <section className="page-head">
           <div>
             <p className="eyebrow">Edit Trouble History</p>
